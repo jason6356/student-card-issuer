@@ -1,0 +1,332 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Card Issuer</title>
+    <!-- TW Elements styles-->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/tw-elements.min.css"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <!-- Main Container-->
+    <div class="flex w-screen h-screen">
+      <!-- Form Container-->
+      <div class="left p-5 w-1/2 h-full border-solid border-2">
+        <h1 class="font-mono font-bold text-lg text-black">
+          Get Your Student Card Here!
+        </h1>
+        <form class="mt-5" id="createCredForm">
+          <!--Student ID-->
+          <div>
+            <label
+              class="block text-gray-700 text-sm font-bold mb-3"
+              for="student_id"
+            >
+              Student ID
+            </label>
+            <input
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+              type="text"
+              placeholder="Student ID"
+              id="student_id"
+            />
+          </div>
+          <!-- Email-->
+          <div class="mt-5">
+            <label
+              class="block text-gray-700 text-sm font-bold mb-3"
+              for="email"
+            >
+              Email
+            </label>
+            <input
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+              type="text"
+              placeholder="Email"
+              id="email"
+            />
+          </div>
+          <!-- Student_Name -->
+          <div class="mt-5">
+            <label
+              class="block text-gray-700 text-sm font-bold mb-3"
+              for="student_name"
+            >
+              Student Name
+            </label>
+            <input
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+              type="text"
+              placeholder="Student Name"
+              id="student_name"
+            />
+          </div>
+          <div class="mt-5">
+            <label class="block text-gray-700 text-sm font-bold mb-3" for="dob">
+              Date of Birth
+            </label>
+            <!-- TW Elements is free under AGPL, with commercial license required for specific uses. See more details: https://tw-elements.com/license/ and contact us for queries at tailwind@mdbootstrap.com -->
+            <div
+              class="relative mb-3 mt-3"
+              data-te-datepicker-init
+              data-te-input-wrapper-init
+            >
+              <input
+                type="text"
+                class="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 peer-focus:text-primary data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:text-neutral-200 dark:peer-focus:text-primary [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
+                placeholder="Select a date"
+                id="dob"
+              />
+              <label
+                for="floatingInput"
+                class="pointer-events-none absolute left-3 top-0 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[1.6] text-neutral-500 transition-all duration-200 ease-out peer-focus:-translate-y-[0.9rem] peer-focus:scale-[0.8] peer-focus:text-primary peer-data-[te-input-state-active]:-translate-y-[0.9rem] peer-data-[te-input-state-active]:scale-[0.8] motion-reduce:transition-none dark:text-neutral-200 dark:peer-focus:text-primary"
+                >Select a date</label
+              >
+            </div>
+          </div>
+          <div class="mt-5">
+            <label
+              class="block text-gray-700 text-sm font-bold mb-3"
+              for="gender"
+            >
+              Gender
+            </label>
+            <select
+              class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              id="grid-state"
+            >
+              <option>Male</option>
+              <option>Female</option>
+            </select>
+          </div>
+
+          <div class="mt-5">
+            <button
+              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded"
+              id="createCredBtn"
+            >
+              Get Credential
+            </button>
+          </div>
+        </form>
+      </div>
+      <!-- Qr Code Generator Container-->
+      <div class="right p-10 w-1/2">
+        <div>
+          <h1
+            id="displayMessage"
+            class="font-bold text-lg text-black font-mono"
+          ></h1>
+          <div id="qrcode"></div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+  </body>
+  <script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/tw-elements.umd.min.js"></script>
+  <script>
+    const createCredForm = document.getElementById("createCredForm")
+
+    let state = {}
+
+    function setState(newState) {
+      state = newState
+    }
+
+    function issueCredential(connection_id) {
+      const url = "http://10.123.10.106:4001/issue-credential-2.0/send-offer"
+
+      const headers = {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      }
+
+      const body = {
+        auto_issue: true,
+        auto_remove: true,
+        comment: "Here is your student card",
+        connection_id: `${connection_id}`,
+        credential_preview: {
+          "@type": "issue-credential/2.0/credential-preview",
+          attributes: [
+            {
+              name: "gender",
+              value: `${state.gender}`,
+            },
+            {
+              name: "email",
+              value: `${state.email}`,
+            },
+            {
+              name: "dob",
+              value: `${state.dob}`,
+            },
+            {
+              name: "student_name",
+              value: `${state.student_name}`,
+            },
+            {
+              name: "student_id",
+              value: `${state.student_id}`,
+            },
+          ],
+        },
+        filter: {
+          indy: {
+            cred_def_id: "NypRCRGykSwKUuRBQx2b9o:3:CL:96:student_card",
+            issuer_did: "NypRCRGykSwKUuRBQx2b9o",
+            schema_id: "NypRCRGykSwKUuRBQx2b9o:2:student_card:1.0",
+            schema_issuer_did: "NypRCRGykSwKUuRBQx2b9o",
+            schema_name: "student_card",
+            schema_version: "1.0",
+          },
+        },
+        trace: true,
+      }
+
+      fetch(url, {
+        method: "POST",
+        headers: headers,
+        mode: "cors",
+        body: JSON.stringify(body),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`)
+          }
+          return response.json()
+        })
+        .then((responseData) => {
+          console.log("POST request successful!")
+        })
+        .catch((error) => {
+          console.error("Error:", error)
+        })
+        .finally(() => {
+          setState({})
+        })
+    }
+
+    createCredForm.addEventListener("submit", (e) => {
+      e.preventDefault()
+
+      const student_id = document.getElementById("student_id").value
+      const email = document.getElementById("email").value
+      const student_name = document.getElementById("student_name").value
+      const dob = document.getElementById("dob").value
+      const gender = document.getElementById("grid-state").value
+      const displayMessage = document.getElementById("displayMessage")
+      const btn = document.getElementById("createCredBtn")
+
+      //validate the values is not empty
+      if (
+        student_id === "" ||
+        email === "" ||
+        student_name === "" ||
+        dob === "" ||
+        gender === ""
+      ) {
+        alert("Field Cannot be Empty")
+        return
+      }
+
+      btn.disabled = true
+      displayMessage.innerHTML =
+        "Successfully Generated QR Code Scan the QR Code to get your Student Card"
+
+      //disable the button
+
+      let credential = {
+        student_id: student_id,
+        email: email,
+        student_name: student_name,
+        dob: dob,
+        gender: gender,
+      }
+
+      setState(credential)
+
+      fetchConnectionAndGenerateQR()
+    })
+
+    function fetchConnectionAndGenerateQR() {
+      const url = "http://10.123.10.106:4001/connections/create-invitation"
+
+      const headers = {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      }
+
+      fetch(url, {
+        method: "POST",
+        headers: headers,
+        mode: "cors",
+        body: JSON.stringify({}),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`)
+          }
+          return response.json()
+        })
+        .then((responseData) => {
+          console.log("POST request successful!")
+          console.log("Response data:", responseData.invitation_url)
+          const invitation_url = responseData.invitation_url
+          const qrcode = new QRCode(document.getElementById("qrcode"), {
+            text: `${invitation_url}`,
+            width: 300,
+            height: 300,
+            colorDark: "#000",
+            colorLight: "#fff",
+            correctLevel: QRCode.CorrectLevel.H,
+          })
+        })
+        .catch((error) => {
+          console.error("Error:", error)
+        })
+    }
+
+    let webSocket = new WebSocket("ws://10.123.10.106:4001/ws")
+
+    webSocket.onopen = function (event) {
+      console.log(`[message] Data received from server: ${event.data}`)
+      const actualData = JSON.parse(event.data)
+      //console.log(actualData)
+
+      if (actualData.topic === "present_proof_v2_0") {
+        if (actualData.payload.state === "presentation-received") {
+        }
+      } else if (actualData.topic === "connections") {
+        if (actualData.payload.state === "active") {
+          const connection_id = actualData.payload.connection_id
+          console.log("SENDING VERIFICATION")
+          issueCredential(connection_id)
+        }
+      }
+    }
+
+    webSocket.onmessage = function (event) {
+      console.log(`[message] Data received from server: ${event.data}`)
+      const actualData = JSON.parse(event.data)
+      //console.log(actualData)
+
+      if (actualData.topic === "issue_credential_v2_0") {
+        if (actualData.payload.state === "done") {
+          alert("Credential Issued Successfully")
+          window.location.reload()
+        }
+      } else if (actualData.topic === "connections") {
+        if (actualData.payload.state === "active") {
+          const connection_id = actualData.payload.connection_id
+          console.log("SENDING VERIFICATION")
+          issueCredential(connection_id)
+        }
+      }
+    }
+  </script>
+</html>
